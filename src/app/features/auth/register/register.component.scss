@@ -1,0 +1,342 @@
+// Modern color palette
+$primary-color: #2563eb;
+$primary-light: #3b82f6;
+$primary-dark: #1d4ed8;
+$secondary-color: #64748b;
+$accent-color: #06b6d4;
+$background-color: #f8fafc;
+$surface-color: #ffffff;
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$border-color: #e2e8f0;
+$shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+.register-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .register-card {
+    max-width: 900px;
+    width: 100%;
+    background: $surface-color;
+    border-radius: 24px;
+    box-shadow: $shadow-large;
+    overflow: hidden;
+    animation: slideUp 0.6s ease-out;
+
+    .header-section {
+      background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+      color: white;
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+
+      .main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.025em;
+      }
+
+      .subtitle {
+        font-size: 1.125rem;
+        margin: 0;
+        opacity: 0.9;
+        font-weight: 400;
+      }
+    }
+
+    .register-form {
+      padding: 2rem;
+
+      .form-section {
+        margin-bottom: 2.5rem;
+
+        .section-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: $text-primary;
+          margin: 0 0 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          &::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: $primary-color;
+            border-radius: 2px;
+          }
+        }
+
+        .section-description {
+          color: $text-secondary;
+          margin: 0 0 1.5rem;
+          font-size: 0.95rem;
+        }
+
+        .form-row {
+          margin-bottom: 1rem;
+        }
+
+        .preferences-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1rem;
+        }
+      }
+
+      .form-field {
+        width: 100%;
+
+        ::ng-deep {
+          .mat-mdc-form-field-outline {
+            border-radius: 12px !important;
+          }
+
+          .mat-mdc-form-field-outline-thick {
+            border-color: $primary-color !important;
+          }
+
+          .mat-mdc-form-field-label {
+            color: $text-secondary !important;
+          }
+
+          .mat-mdc-form-field-icon-prefix {
+            color: $text-secondary !important;
+            margin-right: 8px !important;
+          }
+
+          .mat-mdc-input-element {
+            color: $text-primary !important;
+          }
+
+          .mat-mdc-select-arrow {
+            color: $text-secondary !important;
+          }
+        }
+      }
+
+      .jobs-container {
+        .job-card {
+          margin-bottom: 1.5rem;
+          border-radius: 16px !important;
+          border: 1px solid $border-color !important;
+          box-shadow: $shadow-light !important;
+          transition: all 0.3s ease;
+
+          &:hover {
+            box-shadow: $shadow-medium !important;
+            transform: translateY(-2px);
+          }
+
+          ::ng-deep .mat-mdc-card-header {
+            padding: 1.5rem 1.5rem 0 !important;
+          }
+
+          .job-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: $text-primary;
+            margin: 0;
+
+            mat-icon {
+              color: $primary-color;
+            }
+          }
+
+          .spacer {
+            flex: 1;
+          }
+
+          .remove-btn {
+            transition: all 0.2s ease;
+
+            &:hover {
+              background-color: rgba(239, 68, 68, 0.1) !important;
+              transform: scale(1.05);
+            }
+          }
+
+          .job-form-content {
+            padding: 1.5rem !important;
+
+            .job-form-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 1rem;
+              margin-bottom: 1rem;
+            }
+
+            .description-field {
+              grid-column: 1 / -1;
+            }
+          }
+        }
+
+        .add-job-section {
+          display: flex;
+          justify-content: center;
+          margin-top: 2rem;
+
+          .add-job-btn {
+            background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%) !important;
+            color: white !important;
+            border-radius: 25px !important;
+            padding: 0 2rem !important;
+            font-weight: 600 !important;
+            box-shadow: $shadow-medium !important;
+            transition: all 0.3s ease !important;
+
+            &:hover {
+              transform: translateY(-2px) !important;
+              box-shadow: $shadow-large !important;
+            }
+
+            mat-icon {
+              margin-right: 0.5rem !important;
+            }
+          }
+        }
+      }
+
+      .submit-section {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 1px solid $border-color;
+
+        .submit-btn {
+          background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%) !important;
+          color: white !important;
+          border-radius: 50px !important;
+          padding: 1rem 3rem !important;
+          font-size: 1.1rem !important;
+          font-weight: 600 !important;
+          min-width: 200px !important;
+          box-shadow: $shadow-medium !important;
+          transition: all 0.3s ease !important;
+
+          &:hover:not(:disabled) {
+            transform: translateY(-2px) !important;
+            box-shadow: $shadow-large !important;
+          }
+
+          &:disabled {
+            background: $text-secondary !important;
+            opacity: 0.6 !important;
+          }
+
+          .submit-text {
+            letter-spacing: 0.025em;
+          }
+        }
+
+        .login-link {
+          margin-top: 1.5rem;
+          color: $text-secondary;
+          font-size: 0.95rem;
+
+          .link {
+            color: $primary-color;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+
+            &:hover {
+              color: $primary-dark;
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .register-container {
+    padding: 1rem;
+
+    .register-card {
+      .header-section {
+        padding: 2rem 1.5rem 1.5rem;
+
+        .main-title {
+          font-size: 2rem;
+        }
+
+        .subtitle {
+          font-size: 1rem;
+        }
+      }
+
+      .register-form {
+        padding: 1.5rem;
+
+        .form-section {
+          .preferences-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .jobs-container {
+            .job-card {
+              .job-form-content {
+                .job-form-grid {
+                  grid-template-columns: 1fr;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    .register-card {
+      border-radius: 16px;
+      margin: 0.5rem;
+
+      .header-section {
+        .main-title {
+          font-size: 1.75rem;
+        }
+      }
+
+      .register-form {
+        padding: 1rem;
+
+        .submit-section {
+          .submit-btn {
+            min-width: 150px !important;
+            padding: 0.75rem 2rem !important;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,111 @@
+@use 'sass:color';
+
+/* You can add global styles to this file, and also import other style files */
+
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+}
+
+// Custom Material Menu Panel Styles
+.mat-mdc-menu-panel.user-menu-content {
+    min-width: 220px !important;
+    max-width: 280px !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden !important;
+    margin-top: 8px !important;
+    
+    .mat-mdc-menu-content {
+        padding: 0 !important;
+    }
+    
+    .user-info {
+        padding: 20px 20px 16px !important;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        
+        .user-name {
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            color: #1e293b !important;
+            margin: 0 0 4px 0 !important;
+            line-height: 1.2 !important;
+        }
+        
+        .user-email {
+            font-size: 0.875rem !important;
+            color: #64748b !important;
+            margin: 0 !important;
+            line-height: 1.2 !important;
+            opacity: 0.8 !important;
+        }
+        
+        .user-company {
+            font-size: 0.8rem !important;
+            color: #2563eb !important;
+            margin: 4px 0 0 0 !important;
+            line-height: 1.2 !important;
+            font-weight: 500 !important;
+            opacity: 0.9 !important;
+        }
+    }
+    
+    .menu-actions {
+        padding: 8px 0 !important;
+        
+        .logout-button {
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 12px 20px !important;
+            background: none !important;
+            border: none !important;
+            color: #ef4444 !important;
+            font-size: 0.9rem !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            text-align: left !important;
+            
+            &:hover {
+                background: rgba(239, 68, 68, 0.08) !important;
+                color: color.adjust(#ef4444, $lightness: -10%) !important;
+            }
+            
+            &:active {
+                background: rgba(239, 68, 68, 0.12) !important;
+            }
+            
+            .mat-icon {
+                margin-right: 12px !important;
+                font-size: 1.2rem !important;
+                width: 1.2rem !important;
+                height: 1.2rem !important;
+                opacity: 0.9 !important;
+            }
+            
+            span {
+                flex: 1 !important;
+            }
+        }
+    }
+}

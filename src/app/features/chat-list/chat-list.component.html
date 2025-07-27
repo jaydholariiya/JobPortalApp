@@ -1,0 +1,128 @@
+<div class="chat-container">
+  
+  <div class="job-context-banner" *ngIf="selectedJob">
+    <div class="job-info">
+      <h4>{{ selectedJob.title }}</h4>
+      <p>{{ selectedJob.location }} • ₹{{ selectedJob.salary | number }}</p>
+    </div>
+    <mat-icon>work</mat-icon>
+  </div>
+
+  
+  <div class="user-list-view" *ngIf="!selectedUser">
+    <div class="search-section">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search {{ selectedJob ? 'applicants' : 'users' }}...</mat-label>
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="filterUsers()" placeholder="Search by name or email">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="users-list">
+      <div class="section-header" *ngIf="selectedJob">
+        <h5>Applicants for this Job ({{ applications.length }})</h5>
+      </div>
+      
+      <div class="user-item" 
+           *ngFor="let user of filteredUsers" 
+           (click)="selectUser(user)"
+           [class.has-unread]="user.unreadCount && user.unreadCount > 0">
+        <div class="user-avatar">
+          <mat-icon>person</mat-icon>
+          <div class="online-indicator" *ngIf="user.isOnline"></div>
+        </div>
+        
+        <div class="user-info">
+          <div class="user-header">
+            <h4 class="user-name">{{ user.fullName }}</h4>
+            <span class="message-time" *ngIf="user.appliedDate">
+              {{ formatTime(user.appliedDate) }}
+            </span>
+          </div>
+          <p class="last-message" *ngIf="user.lastMessage">{{ user.lastMessage }}</p>
+          <p class="user-email">{{ user.email }}</p>
+          <div class="status-badges">
+            <span class="applicant-badge">Applicant</span>
+            <span class="status-badge" [class]="'status-' + user.applicationStatus?.toLowerCase()">
+              {{ user.applicationStatus }}
+            </span>
+          </div>
+        </div>
+
+        <div class="unread-badge" *ngIf="user.unreadCount && user.unreadCount > 0">
+          <span class="badge">{{ user.unreadCount }}</span>
+        </div>
+      </div>
+
+      <div class="no-users" *ngIf="filteredUsers.length === 0">
+        <mat-icon>{{ selectedJob ? 'people_outline' : 'people_outline' }}</mat-icon>
+        <p>{{ applications.length === 0 ? 'No applicants for this job yet' : 'No applicants found matching your search' }}</p>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="chat-view" *ngIf="selectedUser">
+    <div class="chat-header">
+      <button mat-icon-button (click)="goBackToUserList()" class="back-btn">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="chat-user-info">
+        <div class="user-avatar">
+          <mat-icon>person</mat-icon>
+          <div class="online-indicator" *ngIf="selectedUser.isOnline"></div>
+        </div>
+        <div class="user-details">
+          <h4>{{ selectedUser.fullName }}</h4>
+          <span class="status">
+            {{ selectedUser.isOnline ? 'Online' : 'Offline' }} • 
+            Status: {{ selectedUser.applicationStatus }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="messages-container" #messagesContainer>
+      <div class="message" 
+           *ngFor="let message of messages"
+           [class.sent]="message.senderId === currentUserId"
+           [class.received]="message.senderId !== currentUserId">
+        <div class="message-content">
+          <p>{{ message.message }}</p>
+          <div class="message-footer">
+            <span class="message-timestamp">{{ formatTime(message.timestamp) }}</span>
+            <mat-icon *ngIf="message.senderId === currentUserId && message.isRead" 
+                     class="read-indicator">done_all</mat-icon>
+            <mat-icon *ngIf="message.senderId === currentUserId && !message.isRead" 
+                     class="sent-indicator">done</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing indicator -->
+      <div class="typing-indicator" *ngIf="selectedUser && isUserTyping(selectedUser.userId)">
+        <div class="typing-dots">
+          <div class="typing-user">{{ selectedUser.fullName }} is typing</div>
+          <div class="dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="message-input">
+      <mat-form-field appearance="outline" class="input-field">
+        <input matInput 
+               [(ngModel)]="newMessage" 
+               (keyup.enter)="sendMessage()"
+               (input)="onTyping()"
+               placeholder="Type your message...">
+      </mat-form-field>
+      <button mat-icon-button color="primary" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

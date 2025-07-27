@@ -1,0 +1,701 @@
+
+<div class="dashboard-header">
+  <div class="header-content">
+    <div class="welcome-section">
+      <h1 class="dashboard-title">{{ roleId === 1 ? 'Admin ( Freelancer ) Dashboard' : 'Job Explorer' }}</h1>
+      <p class="dashboard-subtitle">{{ roleId === 1 ? 'Manage your job postings and find the perfect candidates' :
+        'Discover opportunities that match your skills' }}</p>
+    </div>
+
+    <div class="header-actions">
+      <button *ngIf="roleId === 1" mat-fab extended color="primary" (click)="showAddJobPopup = true" class="add-job-btn">
+        <mat-icon>add</mat-icon>
+        Post New Job
+      </button>
+
+      <div class="user-menu">
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar" matTooltip="User Menu">
+          {{ getUserInitials() }}
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-menu-content">
+          <div class="user-info">
+            <div class="user-name">{{ userName }}</div>
+            <div class="user-email">{{ userEmail }}</div>
+            <div class="user-company" *ngIf="roleId === 1 && companyName">{{ companyName }}</div>
+          </div>
+          
+          <div class="menu-actions">
+            <button class="logout-button" (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              <span>Logout</span>
+            </button>
+          </div>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-container" *ngIf="roleId === 1">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <mat-icon>work</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ jobs.length }}</span>
+        <span class="stat-label">Active Jobs</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <mat-icon>trending_up</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ jobs.length * 5 }}</span>
+        <span class="stat-label">Total Views</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <mat-icon>people</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ jobs.length * 2 }}</span>
+        <span class="stat-label">Applications</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-container">
+  <div class="jobs-section">
+    <div class="search-section" *ngIf="roleId !== 1">
+      <div class="search-header">
+        <h3>Find Your Perfect Job</h3>
+        <p>Search through available opportunities</p>
+      </div>
+      
+      <div class="search-form">
+        <div class="search-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Job Title or Keywords</mat-label>
+            <input matInput [(ngModel)]="searchFilters.title" (ngModelChange)="onSearchChange()" 
+                   placeholder="e.g. Software Engineer, React Developer">
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Location</mat-label>
+            <input matInput [(ngModel)]="searchFilters.location" (ngModelChange)="onSearchChange()" 
+                   placeholder="e.g. Mumbai, Bangalore, Remote">
+            <mat-icon matPrefix>location_on</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="search-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Job Type</mat-label>
+            <mat-select [(ngModel)]="searchFilters.jobType" (selectionChange)="onSearchChange()">
+              <mat-option value="">All Types</mat-option>
+              <mat-option value="Full-time">Full-time</mat-option>
+              <mat-option value="Part-time">Part-time</mat-option>
+              <mat-option value="Contract">Contract</mat-option>
+              <mat-option value="Remote">Remote</mat-option>
+              <mat-option value="Hybrid">Hybrid</mat-option>
+            </mat-select>
+            <mat-icon matPrefix>work</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Application Status</mat-label>
+            <mat-select [(ngModel)]="searchFilters.status" (selectionChange)="onSearchChange()">
+              <mat-option value="">All Jobs</mat-option>
+              <mat-option value="not-applied">Not Applied</mat-option>
+              <mat-option value="Applied">Applied</mat-option>
+              <mat-option value="Reviewed">Reviewed</mat-option>
+              <mat-option value="Shortlisted">Shortlisted</mat-option>
+              <mat-option value="Rejected">Rejected</mat-option>
+              <mat-option value="Hired">Hired</mat-option>
+            </mat-select>
+            <mat-icon matPrefix>assignment</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="search-actions">
+          <button mat-raised-button color="primary" (click)="applyFilters()" class="search-btn">
+            <mat-icon>search</mat-icon>
+            Search Jobs
+          </button>
+          <button mat-stroked-button (click)="clearFilters()" class="clear-btn">
+            <mat-icon>clear</mat-icon>
+            Clear All
+          </button>
+        </div>
+      </div>
+
+      <div class="search-results-info" *ngIf="searchApplied">
+        <div class="results-count">
+          <mat-icon>filter_list</mat-icon>
+          <span>Showing {{ filteredJobs.length }} of {{ allJobs.length }} jobs</span>
+        </div>
+        <div class="active-filters" *ngIf="hasActiveFilters()">
+          <span class="filter-label">Active filters:</span>
+          <mat-chip-set>
+            <mat-chip *ngIf="searchFilters.title" (removed)="removeFilter('title')" removable>
+              Title: {{ searchFilters.title }}
+            </mat-chip>
+            <mat-chip *ngIf="searchFilters.location" (removed)="removeFilter('location')" removable>
+              Location: {{ searchFilters.location }}
+            </mat-chip>
+            <mat-chip *ngIf="searchFilters.jobType" (removed)="removeFilter('jobType')" removable>
+              Type: {{ searchFilters.jobType }}
+            </mat-chip>
+            <mat-chip *ngIf="searchFilters.status" (removed)="removeFilter('status')" removable>
+              Status: {{ searchFilters.status }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header" *ngIf="jobs.length > 0">
+      <h2 class="section-title">
+        {{ roleId === 1 ? 'Your Job Postings' : 'Recommended Jobs' }}
+      </h2>
+      <div class="job-count">{{ jobs.length }} {{ jobs.length === 1 ? 'Job' : 'Jobs' }}</div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="jobs.length === 0">
+      <div class="empty-icon">
+        <mat-icon>{{ roleId === 1 ? 'work_outline' : 'search' }}</mat-icon>
+      </div>
+      <h3>{{ roleId === 1 ? 'No Jobs Posted Yet' : 'No Matching Jobs Found' }}</h3>
+      <p>{{ roleId === 1 ? 'Create your first job posting to attract talented candidates' : 'Try updating your skills or check back later for new opportunities' }}</p>
+      <button *ngIf="roleId === 1" mat-raised-button color="primary" (click)="showAddJobPopup = true">
+        Post Your First Job
+      </button>
+    </div>
+
+    <div class="jobs-grid" *ngIf="jobs.length > 0">
+      <div class="job-card" *ngFor="let job of jobs; trackBy: trackByJobId">
+        <div class="job-header">
+          <div class="job-badge">{{ job.jobType }}</div>
+          <div class="job-actions">
+            <button *ngIf="roleId === 1" mat-icon-button class="action-btn edit-btn" (click)="openEditJob(job)"
+              matTooltip="Edit Job">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button *ngIf="roleId === 1" mat-raised-button color="accent" class="applicants-btn"
+              (click)="showJobApplicants(job)" matTooltip="View Applicants">
+              <mat-icon>people</mat-icon>
+              Applicants
+            </button>
+
+            <button *ngIf="roleId !== 1 && !hasAppliedToJob(job.jobId)" mat-raised-button color="primary"
+              class="apply-btn" (click)="openApplyPopup(job)">
+              <mat-icon>send</mat-icon>
+              Apply Now
+            </button>
+            <button *ngIf="roleId !== 1 && hasAppliedToJob(job.jobId)" mat-stroked-button disabled class="applied-btn">
+              <mat-icon>check_circle</mat-icon>
+              Applied
+            </button>
+          </div>
+        </div>
+
+        <div class="job-content">
+          
+          <h3 class="job-title">{{ job.title }}</h3>
+          <h4 class="job-company">{{job.companyName}}</h4>
+          <p class="job-description">{{ job.description }}</p>
+
+          <div class="job-details">
+            <div class="detail-item">
+              <mat-icon>location_on</mat-icon>
+              <span>{{ job.location }}</span>
+            </div>
+
+            <div class="detail-item">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ job.experienceRequired }} years exp.</span>
+            </div>
+
+            <div class="detail-item salary">
+              <mat-icon>attach_money</mat-icon>
+              <span>₹{{ job.salary | number }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="job-footer">
+          <div class="posted-date">
+            <mat-icon>access_time</mat-icon>
+            <span>Posted {{ formatDate(job.createdDate) }}</span>
+          </div>
+
+          <!-- Application Status for Job Seekers -->
+          <div *ngIf="roleId !== 1 && hasAppliedToJob(job.jobId)" class="application-status">
+            <mat-chip [class]="getStatusColorClass(getApplicationStatusValue(job.jobId))"
+              [attr.data-timestamp]="lastUpdateTimestamp" [attr.data-job-id]="job.jobId">
+              <mat-icon>{{ getStatusIcon(getApplicationStatusValue(job.jobId)) }}</mat-icon>
+              {{ getApplicationStatusValue(job.jobId) }}
+            </mat-chip>
+            <span class="status-text">{{ getApplicationStatus(job.jobId) }}</span>
+          </div>
+
+          <!-- Chat Button for Job Seekers -->
+          <div *ngIf="roleId !== 1" class="user-chat-actions">
+            <button mat-mini-fab color="accent" (click)="openUserChat(job)" 
+                    class="chat-fab-btn" matTooltip="Chat with Admin about this job">
+              <mat-icon>chat</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modern Add Job Modal -->
+@if(showAddJobPopup){
+<div class="modal-overlay" (click)="showAddJobPopup = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <mat-icon>{{ isEditMode ? 'edit' : 'add_circle' }}</mat-icon>
+        {{ isEditMode ? 'Edit Job Posting' : 'Create New Job Posting' }}
+      </h2>
+      <button mat-icon-button class="close-btn" (click)="showAddJobPopup = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form (ngSubmit)="submitJob()" #jobForm="ngForm" class="job-form">
+      <div class="form-section">
+        <h3 class="form-section-title">Job Information</h3>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Job Title</mat-label>
+            <input matInput [(ngModel)]="newJob.title" name="title" required
+              placeholder="e.g. Senior Software Engineer">
+            <mat-icon matPrefix>work</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Job Description</mat-label>
+            <textarea matInput [(ngModel)]="newJob.description" name="description" required rows="4"
+              placeholder="Describe the role, responsibilities, and requirements...">
+            </textarea>
+            <mat-icon matPrefix>description</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Location</mat-label>
+            <mat-select [(ngModel)]="newJob.location" name="location" required placeholder="Select location">
+              <mat-option *ngFor="let location of locations" [value]="location">
+                {{ location }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>location_on</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Job Type</mat-label>
+            <mat-select [(ngModel)]="newJob.jobType" name="jobType" required placeholder="Select job type">
+              <mat-option *ngFor="let jobType of jobTypes" [value]="jobType">
+                {{ jobType }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>schedule</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Years of Experience Required</mat-label>
+            <input matInput type="number" [(ngModel)]="newJob.experienceRequired" name="experienceRequired" required
+              min="0" placeholder="0">
+            <mat-icon matPrefix>trending_up</mat-icon>
+            <span matSuffix style="margin-right: 12px;">years</span>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Annual Salary</mat-label>
+            <input matInput type="number" [(ngModel)]="newJob.salary" name="salary" required min="0"
+              placeholder="50000">
+            <mat-icon matPrefix>attach_money</mat-icon>
+            <span matSuffix style="margin-right: 12px;">USD</span>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" class="cancel-btn" (click)="showAddJobPopup = false">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" type="submit" class="submit-btn" [disabled]="jobForm.invalid">
+          <mat-icon>{{ isEditMode ? 'save' : 'publish' }}</mat-icon>
+          {{ isEditMode ? 'Update Job' : 'Post Job' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- Modern Apply Job Modal -->
+@if (showApplyPopup) {
+<div *ngIf="showApplyPopup" class="modal-overlay" (click)="showApplyPopup = false">
+  <div class="modal-content application-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <mat-icon>send</mat-icon>
+        Apply for {{ selectedJob?.title }}
+      </h2>
+      <button mat-icon-button class="close-btn" (click)="showApplyPopup = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="job-summary">
+      <div class="job-summary-header">
+        <h4>{{ selectedJob?.title }}</h4>
+        <div class="job-summary-details">
+          <span class="detail-chip">
+            <mat-icon>location_on</mat-icon>
+            {{ selectedJob?.location }}
+          </span>
+          <span class="detail-chip">
+            <mat-icon>attach_money</mat-icon>
+            ₹{{ selectedJob?.salary | number }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="applyForm" (ngSubmit)="submitApplication()" class="application-form">
+      <div class="form-section">
+        <h3 class="form-section-title">Application Details</h3>
+
+        <mat-form-field appearance="outline" class="form-field" style="width: 100%; margin-top: 6px;">
+          <mat-label>Cover Letter / Remarks</mat-label>
+          <textarea matInput formControlName="remarks" rows="5"
+            placeholder="Tell us why you're the perfect fit for this role...">
+          </textarea>
+          <mat-icon matPrefix>edit</mat-icon>
+        </mat-form-field>
+
+        <div class="file-upload-section">
+          <div class="upload-header">
+            <mat-icon>attach_file</mat-icon>
+            <span>Resume / CV</span>
+          </div>
+
+          <div class="file-upload-area" [class.has-file]="selectedFileName" (click)="fileInput.click()">
+            <div class="upload-content">
+              <mat-icon class="upload-icon">{{ selectedFileName ? 'check_circle' : 'cloud_upload' }}</mat-icon>
+              <p class="upload-text">
+                {{ selectedFileName || 'Click to upload your resume' }}
+              </p>
+              <p class="upload-hint" *ngIf="!selectedFileName">
+                PDF, DOC, or DOCX files only
+              </p>
+            </div>
+            <input type="file" hidden (change)="onFileSelected($event)" #fileInput accept=".pdf,.doc,.docx" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" class="cancel-btn" (click)="showApplyPopup = false">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" type="submit" class="submit-btn"
+          [disabled]="applyForm.invalid || !selectedFile">
+          <mat-icon>send</mat-icon>
+          Submit Application
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- Applicants View Modal -->
+@if(showApplicantsPopup){
+<div class="modal-overlay" (click)="showApplicantsPopup = false">
+  <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <mat-icon>people</mat-icon>
+        Job Applicants - {{ selectedJobForApplicants?.title }}
+      </h2>
+      <div class="modal-footer">
+        <button mat-raised-button color="accent" (click)="openJobChat()" class="chat-job-btn">
+          <mat-icon>chat</mat-icon>
+          Open Chat for this Job
+        </button>
+      </div>
+      <button mat-icon-button class="close-btn" (click)="showApplicantsPopup = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="applicants-content">
+      <div class="applicants-stats">
+        <div class="stat-card">
+          <mat-icon>people</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ jobApplicants.length }}</span>
+            <span class="stat-label">Total Applicants</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <mat-icon>pending</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ getApplicantsByStatus('Applied').length }}</span>
+            <span class="stat-label">Pending Review</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <mat-icon>check_circle</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ getApplicantsByStatus('Reviewed').length }}</span>
+            <span class="stat-label">Reviewed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="applicants-list" *ngIf="jobApplicants.length > 0; else noApplicants">
+        <div class="applicant-card" *ngFor="let applicant of jobApplicants">
+          <div class="applicant-header">
+            <div class="applicant-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="applicant-info">
+              <h3 class="applicant-name">{{ applicant.userName }}</h3>
+              <p class="applicant-email">{{ applicant.email }}</p>
+              <span class="applied-date">Applied on {{ formatDate(applicant.appliedDate) }}</span>
+            </div>
+            <div class="applicant-status">
+              <mat-chip [class]="getStatusColorClass(applicant.status)">
+                {{ applicant.status }}
+              </mat-chip>
+            </div>
+          </div>
+
+          <div class="applicant-details" *ngIf="applicant.remarks">
+            <h4>Cover Letter / Remarks:</h4>
+            <p class="remarks-text">{{ applicant.remarks }}</p>
+          </div>
+
+          <div class="applicant-actions">
+            <button mat-stroked-button color="primary" (click)="downloadResume(applicant)"
+              *ngIf="applicant.applicationId" class="action-btn" matTooltip="Download Resume">
+              <mat-icon>download</mat-icon>
+              Download Resume
+            </button>
+            <button mat-raised-button color="warn" class="action-btn" (click)="openStatusUpdateModal(applicant)"
+              matTooltip="Update Application Status">
+              <mat-icon>edit</mat-icon>
+              Update Status
+            </button>
+            <button mat-raised-button color="accent" class="action-btn" matTooltip="Contact Applicant">
+              <mat-icon>email</mat-icon>
+              Contact
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noApplicants>
+        <div class="no-applicants">
+          <mat-icon class="no-data-icon">people_outline</mat-icon>
+          <h3>No Applicants Yet</h3>
+          <p>This job posting hasn't received any applications yet.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Status Update Modal -->
+@if(showStatusUpdateModal){
+<div class="modal-overlay" (click)="closeStatusUpdateModal()">
+  <div class="modal-content status-update-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <mat-icon>edit</mat-icon>
+        Update Application Status
+      </h2>
+      <button mat-icon-button class="close-btn" (click)="closeStatusUpdateModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="status-update-content">
+      <div class="applicant-summary">
+        <div class="applicant-info">
+          <h3>{{ selectedApplicant?.userName }}</h3>
+          <p>{{ selectedApplicant?.userEmail }}</p>
+          <span class="current-status">
+            Current Status:
+            <mat-chip [class]="getStatusColorClass(selectedApplicant?.status)">
+              {{ selectedApplicant?.status }}
+            </mat-chip>
+          </span>
+        </div>
+      </div>
+
+      <form class="status-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Application Status</mat-label>
+            <mat-select [(ngModel)]="selectedStatus" name="status" required>
+              <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+                <div class="status-option">
+                  {{ option.label }}
+                </div>
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>assignment</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Remarks / Feedback</mat-label>
+            <textarea matInput [(ngModel)]="statusRemarks" name="remarks" rows="4"
+              placeholder="Add any feedback or remarks for the applicant...">
+            </textarea>
+            <mat-icon matPrefix>comment</mat-icon>
+          </mat-form-field>
+        </div>
+      </form>
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" class="cancel-btn" (click)="closeStatusUpdateModal()">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" type="button" class="submit-btn" (click)="updateApplicationStatus()"
+          [disabled]="!selectedStatus">
+          <mat-icon>save</mat-icon>
+          Update Status
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Chat Sidebar -->
+<div class="chat-sidebar-overlay" *ngIf="showChatSidebar" (click)="closeChatSidebar()">
+  <div class="chat-sidebar" (click)="$event.stopPropagation()">
+    <div class="chat-sidebar-header">
+      <h3>
+        <mat-icon>chat</mat-icon>
+        {{ selectedJobForApplicants ? 'Job Chat: ' + selectedJobForApplicants.title : 'Admin Chat' }}
+      </h3>
+      <button mat-icon-button (click)="closeChatSidebar()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="chat-sidebar-content">
+      <app-chat-list [selectedJob]="selectedJobForApplicants" [applications]="jobApplicants"></app-chat-list>
+    </div>
+  </div>
+</div>
+
+<!-- User Chat Popup -->
+@if(showUserChatPopup){
+<div class="modal-overlay" (click)="closeUserChatPopup()">
+  <div class="modal-content user-chat-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <mat-icon>chat</mat-icon>
+        Chat about: {{ selectedJobForChat?.title }}
+      </h2>
+      <button mat-icon-button class="close-btn" (click)="closeUserChatPopup()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="chat-content">
+      <!-- Job Context Banner -->
+      <div class="job-context-banner" *ngIf="selectedJobForChat">
+        <div class="job-info">
+          <h4>{{ selectedJobForChat.title }}</h4>
+          <p>{{ selectedJobForChat.location }} • ₹{{ selectedJobForChat.salary | number }}</p>
+          <span class="job-type">{{ selectedJobForChat.jobType }}</span>
+        </div>
+        <mat-icon>work</mat-icon>
+      </div>
+
+      <!-- Chat Messages -->
+      <div class="chat-messages" #chatMessages>
+        <!-- Debug info - remove in production -->
+        <div *ngIf="userChatMessages.length === 0" class="debug-info">
+          <small>Debug: Chat for job {{ selectedJobForChat?.title }} | Admin ID: {{ selectedJobForChat?.adminId || 1 }} | User ID: {{ userId }}</small>
+        </div>
+        
+        <div class="message" 
+             *ngFor="let message of userChatMessages; trackBy: trackByMessageId"
+             [class.sent]="message.senderId === userId"
+             [class.received]="message.senderId !== userId">
+          <div class="message-content">
+            <div class="message-header" *ngIf="message.senderId !== userId">
+              <strong>Admin</strong>
+            </div>
+            <p>{{ message.message }}</p>
+            <span class="message-timestamp">{{ formatChatTime(message.timestamp) }}</span>
+          </div>
+        </div>
+        
+        <div *ngIf="userChatMessages.length === 0" class="no-messages">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <p>Start a conversation about this job opportunity</p>
+          <small>Messages count: {{ userChatMessages.length }}</small>
+        </div>
+      </div>
+
+      <!-- Message Input -->
+      <div class="message-input-section">
+        <mat-form-field appearance="outline" class="message-input-field">
+          <input matInput 
+                 [(ngModel)]="userNewMessage" 
+                 (keyup.enter)="sendUserMessage()"
+                 (input)="onUserTyping()"
+                 placeholder="Type your message about this job..."
+                 [disabled]="!selectedJobForChat">
+          <mat-icon matPrefix>edit</mat-icon>
+        </mat-form-field>
+        <button mat-raised-button color="primary" 
+                (click)="sendUserMessage()" 
+                [disabled]="!userNewMessage.trim() || !selectedJobForChat"
+                class="send-btn">
+          <mat-icon>send</mat-icon>
+          Send
+        </button>
+        <!-- Debug button - remove in production -->
+        <button mat-stroked-button color="accent" 
+                (click)="addTestMessage()" 
+                class="test-btn"
+                *ngIf="userChatMessages.length === 0">
+          <mat-icon>bug_report</mat-icon>
+          Test
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
